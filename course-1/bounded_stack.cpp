@@ -25,12 +25,12 @@ class BoundedStack {
  public:
   // предусловие: значение аргумента capacity должно быть положительным целочисленным числом
   // постусловие: пустой инициализированный стек, с которым можно работать
-  explicit BoundedStack(const int capacity = 32) : capacity_(capacity) {
+  explicit BoundedStack(int capacity = 32) : capacity_(capacity) {
     clear();
   }
 
   // следуем Rule-Of-Five:
-  
+
   // копирование стека недоступно 
   BoundedStack(const BoundedStack<T>&) = delete;
   BoundedStack<T>& operator=(const BoundedStack<T>&) = delete;
@@ -96,7 +96,7 @@ class BoundedStack {
 
  private:
   List<T> bounded_stack_;  // основное хранилище стека
-  const int capacity_;     // максимально допустимое кол-во элементов в стеке
+  int capacity_;           // максимально допустимое кол-во элементов в стеке
 
   PEEK_STATUS peek_status_;  // статус запроса peek()
   POP_STATUS pop_status_;    // статус команды pop()
