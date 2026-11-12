@@ -4,7 +4,7 @@
 template <typename T>
 class ParentList {
  public:
-  virtual ~ParentList() = 0;
+  virtual ~ParentList() = default;
 
  public:
   // команды
@@ -69,17 +69,17 @@ class ParentList {
 
   // запросы статусов (возможные значения статусов)
 
-  virtual int get_head_status();          // успешно; список пуст
-  virtual int get_tail_status();          // успешно; список пуст
-  virtual int get_right_status();         // успешно; правее нету элемента
-  virtual int get_put_right_status();     // успешно; список пуст
-  virtual int get_put_left_status();      // успешно; список пуст
-  virtual int get_add_to_empty_status();  // успешно
-  virtual int get_remove_status();        // успешно; список пуст
-  virtual int get_replace_status();       // успешно; список пуст
-  virtual int get_find_status();          // следующий найден;
-                                          // следующий не найден; список пуст
-  virtual int get_get_status();           // успешно; список пуст
+  virtual int get_head_status() = 0;          // успешно; список пуст
+  virtual int get_tail_status() = 0;          // успешно; список пуст
+  virtual int get_right_status() = 0;         // успешно; правее нету элемента
+  virtual int get_put_right_status() = 0;     // успешно; список пуст
+  virtual int get_put_left_status() = 0;      // успешно; список пуст
+  virtual int get_add_to_empty_status() = 0;  // успешно
+  virtual int get_remove_status() = 0;        // успешно; список пуст
+  virtual int get_replace_status() = 0;       // успешно; список пуст
+  virtual int get_find_status() = 0;          // следующий найден;
+      // следующий не найден; список пуст
+  virtual int get_get_status() = 0;  // успешно; список пуст
 };
 
 #endif  // PARENT_LIST_H

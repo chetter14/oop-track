@@ -4,7 +4,7 @@
 #include "parent_list.h"
 
 template <typename T>
-class TwoWayList : public virtual ParentList<T> {
+class TwoWayList : public ParentList<T> {
  public:
   enum class LEFT_STATUS {
     OK = 0,        // последний left() выполнился успешно
@@ -17,6 +17,8 @@ class TwoWayList : public virtual ParentList<T> {
  public:
   // команды
 
+  // предусловие: левее курсора есть элемент;
+  // постусловие: курсор сдвинут на один узел влево
   virtual void left() = 0;
 
   // запросы статусов
