@@ -2,7 +2,22 @@
 #include <new>
 #include <utility>
 
+// Добавил использование концептов, чтобы такие операции как
+// "array[j] = std::move(array[j + 1])" и "array[count - 1] = T()"
+// не выбрасивали исключений
+
 template <typename T>
+concept NothrowMoveAssignable = requires(T a, T b) {
+  { a = std::move(b) } noexcept;
+};
+
+template <typename T>
+concept NothrowDefaultConstructible = requires {
+  { T() } noexcept;
+};
+
+template <typename T>
+  requires NothrowMoveAssignable<T> && NothrowDefaultConstructible<T>
 class DynArrayImpl : public DynArray<T> {
  private:
   using MAKE_ARRAY_STATUS = typename DynArray<T>::MAKE_ARRAY_STATUS;
@@ -17,7 +32,7 @@ class DynArrayImpl : public DynArray<T> {
   // постусловие: создан пустой массив ёмкостью MIN_CAPACITY
   DynArrayImpl() { MakeArray(MIN_CAPACITY); }
 
-  // укажу явно, что копирование и перемещение запрещено
+  // указываю явно, что копирование и перемещение запрещено
   // (а в принципе это стоило бы реализовать)
   DynArrayImpl(const DynArrayImpl& other) = delete;
   DynArrayImpl(DynArrayImpl&& other) = delete;
@@ -103,13 +118,10 @@ class DynArrayImpl : public DynArray<T> {
   GET_ITEM_STATUS get_get_item_status() override { return get_item_status; }
 
  private:
-  // предусловие: 0 <= i <= count
-  // постусловие: item вставлен в i-ю позицию, при переполнении буфер удвоен;
-  // возвращает false, если памяти не хватило (массив не изменён)
   bool InsertAt(T item, int i) {
     if (count == capacity) {
       int new_capacity = capacity * 2;
-      if (new_capacity < MIN_CAPACITY) {  // буфера нет после перемещения
+      if (new_capacity < MIN_CAPACITY) {
         new_capacity = MIN_CAPACITY;
       }
 
@@ -127,7 +139,7 @@ class DynArrayImpl : public DynArray<T> {
     return true;
   }
 
-  // постусловие: буфер заменён новым ёмкостью new_capacity,
+  // буфер заменяется новой ёмкостью new_capacity,
   // в него перенесены первые min(count, new_capacity) элементов;
   // возвращает false, если памяти не хватило (массив не изменён)
   bool Reallocate(int new_capacity) {
@@ -137,13 +149,8 @@ class DynArrayImpl : public DynArray<T> {
     }
 
     const int new_count = count < new_capacity ? count : new_capacity;
-    try {
-      for (int i = 0; i < new_count; ++i) {
-        new_array[i] = std::move(array[i]);
-      }
-    } catch (...) {
-      delete[] new_array;
-      throw;
+    for (int i = 0; i < new_count; ++i) {
+      new_array[i] = std::move(array[i]);
     }
 
     delete[] array;
@@ -152,17 +159,6 @@ class DynArrayImpl : public DynArray<T> {
     capacity = new_capacity;
 
     return true;
-  }
-
-  void Swap(DynArrayImpl& other) noexcept {
-    std::swap(count, other.count);
-    std::swap(capacity, other.capacity);
-    std::swap(array, other.array);
-    std::swap(make_array_status, other.make_array_status);
-    std::swap(append_status, other.append_status);
-    std::swap(insert_status, other.insert_status);
-    std::swap(remove_status, other.remove_status);
-    std::swap(get_item_status, other.get_item_status);
   }
 
  private:
